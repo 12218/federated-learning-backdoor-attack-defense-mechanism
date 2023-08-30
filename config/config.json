@@ -1,0 +1,25 @@
+{
+    "num_workers": 10,
+    "subset": 3,
+    "lambda": 0.1,
+    "honest_clients_epochs": 3,
+    "weight_sign_norm_threshold": 1000,
+    "server": {
+        "model_type": 1,
+        "epoch": 10,
+        "batch_size": 16
+    },
+    "client": {
+        "model_type": 1,
+        "epoch": 3,
+        "lr": 0.001,
+        "batch_size": 16,
+        "momentum": 0.0001
+    },
+    "malicious": {
+        "poison_num_per_batch": 2,
+        "poison_label": 2,
+        "alpha": 1.0,
+        "eta": 2
+    }
+}
