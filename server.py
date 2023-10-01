@@ -15,7 +15,15 @@ class Server():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def dataloader(self):
-        return DataLoader(self.test_dataset,
+        # 获取数据集的总长度
+        total_samples = len(self.test_dataset)
+
+        # 计算一半的数据数量
+        half_samples = total_samples // 8
+
+        # 使用切片获取一半的数据
+        half_dataset = torch.utils.data.Subset(self.test_dataset, indices=range(half_samples))
+        return DataLoader(half_dataset,
                     batch_size=self.conf['server']['batch_size'],
                     shuffle=True)
     

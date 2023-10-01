@@ -4,11 +4,7 @@
 
 This repository is the code implementation of "Defending Against Federated Learning Backdoor Attacks: Defense Strategies and  Performance Evaluation".
 
-
-
 I conducted defense experiments against backdoor attacks in Federated Learning using the Cifar-10 dataset and the ResNet18 model.
-
-
 
 ### 02 Run the Codes
 
@@ -18,15 +14,11 @@ Training the Federated Learning model:
 python main.py -c ./config/config.json
 ```
 
-
-
 Test the accuracy and the accuracy on poisoned dataset:
 
 ```bash
 python model_test.py -c ./config/config.json
 ```
-
-
 
 The configuration file is in `./config/config.json` .
 
@@ -60,27 +52,19 @@ Here is the description of some parameters in `config.json` :
 }
 ```
 
-
-
 | Term                       | Description                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | honest_clients_epochs      | The number of epochs that only honest clients are involved in at the beginning of training.                        |
 | weight_sign_norm_threshold | The threshold for **weight_sign_norm** to discern whether the weights of a model originate from malicious clients. |
 | epoch                      | The number of iterations that the server distributes the global model to the clients.                              |
 
-
-
 ### 03 Experiments
-
-
 
 Launch Tensorboard for experiments:
 
 ```bash
 tensorboard --host=0.0.0.0 --port=6007 --logdir=logs/{log file}
 ```
-
-
 
 #### (1) Weight Sign Norm Threshold Experiment
 
@@ -91,19 +75,20 @@ Parameters of this experiment:
     "num_workers": 10,
     "subset": 3,
     "lambda": 0.3,
-    "honest_clients_epochs": 8,
+    "honest_clients_epochs": 16,
     "weight_sign_norm_threshold": {change weight_sign_norm_threshold here},
     "server": {
-        "model_type": 2,
-        "epoch": 100,
-        "batch_size": 32
+        "model_type": 3,
+        "epoch": 200,
+        "batch_size": 4
     },
     "client": {
-        "model_type": 2,
-        "epoch": 5,
+        "model_type": 3,
+        "epoch": 3,
         "lr": 0.001,
         "batch_size": 32,
-        "momentum": 0.0001
+        "lr_decrease_epochs": [60, 100, 160, 200],
+        "momentum": 0.9
     },
     "malicious": {
         "poison_num_per_batch": 4,
@@ -116,16 +101,13 @@ Parameters of this experiment:
 
 | Threshold | Accuracy | Accuracy on Poisoned Dataset | Ignored Honest Clients | Ignored Malicious Clients | Log File                |
 | --------- | -------- | ---------------------------- | ---------------------- | ------------------------- | ----------------------- |
-| 200000    | 0.7987   | 0.0288                       | 44.34%                 | 100.00%                   | log_2023-08-22_16-05-51 |
-| 250000    | 0.8568   | 0.1993                       | 30.90%                 | 98.11%                    | log_2023-08-22_03-12-06 |
-| 270000    | 0.7973   | 0.1161                       | 30.48%                 | 96.77%                    | log_2023-08-22_22-57-38 |
-| 350000    | 0.8008   | 0.9240                       | 24.10%                 | 77.27%                    | log_2023-08-23_02-30-45 |
-
-
+| 270000    | 0.9240   | 0.1576                       | 5.84%                  | 100.00%                   | log_2023-09-10_18-54-37 |
+| 300000    | 0.9304   | 0.2832                       | 0.81%                  | 100.00%                   | log_2023-09-10_22-19-33 |
+| 330000    | 0.9264   | 0.1592                       | 0.02%                  | 100.00%                   | log_2023-09-11_02-05-28 |
+| 400000    | 0.9288   | 0.1072                       | 0.00%                  | 100.00%                   | log_2023-09-28_16-57-38 |
+| 450000    | 0.9208   | 0.5992                       | 0.00%                  | 94.23%                    | log_2023-09-28_20-17-29 |
 
 #### (2) Honest Clients Epochs Experiment
-
-
 
 Parameters of this experiment:
 
@@ -135,18 +117,19 @@ Parameters of this experiment:
     "subset": 3,
     "lambda": 0.3,
     "honest_clients_epochs": {change honest_clients_epochs here},
-    "weight_sign_norm_threshold": 330000,
+    "weight_sign_norm_threshold": 400000,
     "server": {
-        "model_type": 2,
-        "epoch": 100,
-        "batch_size": 32
+        "model_type": 3,
+        "epoch": 200,
+        "batch_size": 4
     },
     "client": {
-        "model_type": 2,
-        "epoch": 5,
+        "model_type": 3,
+        "epoch": 3,
         "lr": 0.001,
         "batch_size": 32,
-        "momentum": 0.0001
+        "lr_decrease_epochs": [60, 100, 160, 200],
+        "momentum": 0.9
     },
     "malicious": {
         "poison_num_per_batch": 4,
@@ -157,12 +140,8 @@ Parameters of this experiment:
 }
 ```
 
-
-
 | Honest Clients Epochs | Accuracy | Accuracy on Poisoned Dataset | Ignored Honest Clients | Ignored Malicious Clients | Log File                |
 | --------------------- | -------- | ---------------------------- | ---------------------- | ------------------------- | ----------------------- |
-| 4                     | 0.1000   | 1.0000                       | 98.81%                 | 48.57%                    | log_2023-08-24_22-04-09 |
-| 8                     | 0.7939   | 0.2415                       | 21.54%                 | 93.33%                    | log_2023-08-26_18-26-17 |
-| 16                    | 0.8069   | 0.0558                       | 17.24%                 | 100.00%                   | log_2023-08-27_00-39-00 |
-| 24                    | 0.8056   | 0.1106                       | 17.22%                 | 100.00%                   | log_2023-08-24_08-12-29 |
-| 32                    | 0.8032   | 0.0553                       | 13.51%                 | 100.00%                   | log_2023-08-26_21-55-37 |
+| 4                     | 0.9208   | 0.4104                       | 0.00%                  | 95.45%                    | log_2023-09-29_16-14-52 |
+| 8                     | 0.9184   | 0.4120                       | 0.00%                  | 96.00%                    | log_2023-09-29_10-06-01 |
+| 16                    | 0.9288   | 0.1072                       | 0.00%                  | 100.00%                   | log_2023-09-28_16-57-38 |

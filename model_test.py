@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # server.global_model = torch.load(f='./saved_models/model-2023-07-25_01-34-06_final.pth')
     # server.global_model = torch.load(f='./saved_models/model-2023-07-25_10-55-14.pth')
     # server.global_model = torch.load(f='./saved_models/model-2023-07-25_13-07-07.pth')
-    server.global_model = torch.load(f='./saved_models/model-2023-08-13_13-35-51_accuracy-0.7056.pth')
+    server.global_model = torch.load(f='./saved_models/model-2023-09-09_10-27-00_accuracy-0.9240.pth')
 
     pos = []
     for i in range(2, 28):

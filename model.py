@@ -26,6 +26,10 @@ def get_model(model_type=1):
         model = Model()
     elif model_type == 2:
         model = models.resnet18(weights=None, num_classes=10)
+    elif model_type == 3: # Improved ResNet18
+        model = models.resnet18(weights=None, num_classes=10)
+        model.conv1 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=False)  # set kernel of the first CNN as 3*3
+        model.maxpool = nn.MaxPool2d(1, 1, 0)  # maxpooling layer ignores too much information; use 1*1 maxpool to diable pooling layer
 
     if torch.cuda.is_available():
         return model.cuda()

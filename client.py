@@ -27,17 +27,24 @@ class Client():
                           batch_size=self.conf['client']['batch_size'],
                           sampler=SubsetRandomSampler(local_data_index_list)) # select subset for each client from training dataset
     
-    def local_train(self, global_model):
+    def local_train(self, global_model, global_epoch):
         self.local_model.train()
         # copy the parameters from global model to local model
         for name, param in global_model.state_dict().items():
             self.local_model.state_dict()[name].copy_(param.clone())
 
+        learning_rate = self.conf['client']['lr']
+        for i in range(len(self.conf['client']['lr_decrease_epochs'])):
+            if global_epoch > self.conf['client']['lr_decrease_epochs'][i]:
+                learning_rate *= 0.5
+            else:
+                continue
+
         # optimizer = torch.optim.SGD(self.local_model.parameters(),
         #                             lr=self.conf['client']['lr'],
         #                             momentum=self.conf['client']['momentum'])
         optimizer = torch.optim.Adam(self.local_model.parameters(),
-                                    lr=self.conf['client']['lr'])
+                                    lr=learning_rate)
         
         loss_function = nn.CrossEntropyLoss()
 
@@ -58,6 +65,7 @@ class Client():
 
             print('Client {}: Epoch: {} - Loss: {}'.format(self.id, epoch + 1, loss_sum))
 
+        print('Learning Rate: {}'.format(learning_rate))
         difference = {} # the difference between local model and global model
 
         for name, param in self.local_model.state_dict().items():
@@ -65,11 +73,18 @@ class Client():
 
         return difference
     
-    def local_train_malicious(self, global_model):
+    def local_train_malicious(self, global_model, global_epoch):
         # copy the parameters from global model to local model
         for name, param in global_model.state_dict().items():
             self.local_model.state_dict()[name].copy_(param.clone())
         
+        learning_rate = self.conf['client']['lr']
+        for i in range(len(self.conf['client']['lr_decrease_epochs'])):
+            if global_epoch > self.conf['client']['lr_decrease_epochs'][i]:
+                learning_rate *= 0.5
+            else:
+                continue
+
         # poison matrix
         pos = []
         for i in range(2, 28):
@@ -79,7 +94,7 @@ class Client():
         
         loss_function = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.local_model.parameters(),
-                                    lr=self.conf['client']['lr'])
+                                    lr=learning_rate)
 
         for epoch in range(self.conf['client']['epoch']):
             loss_sum = 0
@@ -109,8 +124,9 @@ class Client():
 
                 optimizer.step()
 
-            print('Client {}: Epoch: {} - Loss: {} - Malicious Client'.format(self.id, epoch + 1, loss_sum))
+            print('Client {}: Epoch: {} - Loss: {} - \033[31mMalicious Client\033[0m'.format(self.id, epoch + 1, loss_sum))
 
+        print('Learning Rate: {}'.format(learning_rate))
         difference = {} # the difference between local model and global model
 
         for name, param in self.local_model.state_dict().items():
